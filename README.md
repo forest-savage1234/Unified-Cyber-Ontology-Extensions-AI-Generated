@@ -307,6 +307,23 @@ These extensions have been aligned with the [CDO Community Playground](https://g
 - **action-ai-ext:** Forensic action types are now `owl:Class` (subClassOf `uco-observable:ObservableAction`), not `owl:NamedIndividual`. OWL in `ontology/action-ai-ext.ttl`, SHACL in `ontology/action-ai-ext-shapes.ttl`. Exemplar: `exemplars/action-ai-ext-exemplar.ttl`.
 - **observable-ai-ext:** OWL in `ontology/observable-ai-ext.ttl`, SHACL in `ontology/observable-ai-ext-shapes.ttl`. Exemplars can be added as needed for testing.
 
+## Validation and case_validate
+
+The CASE typo-checker (used by **case_validate** from `pip install case-utils`) looks for IRIs that start with `https://ontology.unifiedcyberontology.org/`. To avoid extension terms being treated as official UCO and flagged, the **action-ai-ext exemplar** uses the prefix `http://example.org/ontology/action-ai-ext/` for `action_ai_ext` instead of the canonical UCO namespace. The ontology file still defines terms at the canonical namespace; in a profile or validation context you can load the ontology and use the same example.org prefix for the exemplar so the typo-checker accepts it.
+
+**Validated with case_validate** (extension ontologies must be passed so the class hierarchy is recognized):
+
+```bash
+# action-ai-ext exemplar (run from this repo root; requires --ontology-graph, --inference rdfs, --allow-info)
+case_validate --built-version case-1.4.0 \
+  --ontology-graph ontology/action-ai-ext.ttl \
+  --ontology-graph ontology/observable-ai-ext.ttl \
+  --inference rdfs --allow-info \
+  exemplars/action-ai-ext-exemplar.ttl
+```
+
+Other options: **CASE-Profile-Example** (`make -j check` per `CDO-Playground-Testing.md`); **pyshacl** with `--ont-graph` including the extension ontologies.
+
 ## License
 
 Apache-2.0

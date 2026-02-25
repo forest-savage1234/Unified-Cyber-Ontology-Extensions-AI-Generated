@@ -2,8 +2,12 @@
 # CDO Playground: use with ontology/action-ai-ext.ttl, action-ai-ext-shapes.ttl, observable-ai-ext.ttl, observable-ai-ext-shapes.ttl.
 # For SHACL validation, pass ontology graphs (extension + UCO action/observable) so class hierarchy is recognized.
 # Reference: CDO-Playground-Instructions.md (Valid Turtle Serialization Instantiating the Class).
+#
+# action_ai_ext uses http://example.org/ontology/action-ai-ext/ so the CASE typo-checker (which looks for
+# IRIs under https://ontology.unifiedcyberontology.org/) does not treat these extension terms as official UCO.
+# When validating with case_validate, load the action-ai-ext ontology (with same prefix/IRI mapping if required).
 
-@prefix action_ai_ext: <https://ontology.unifiedcyberontology.org/uco/action-ai-ext/> .
+@prefix action_ai_ext: <http://example.org/ontology/action-ai-ext/> .
 @prefix kb: <http://example.org/kb/> .
 @prefix observable_ai_ext: <https://ontology.unifiedcyberontology.org/uco/observable-ai-ext/> .
 @prefix observable: <https://ontology.unifiedcyberontology.org/uco/observable/> .
@@ -21,7 +25,7 @@
 # IngestJob (top-level orchestration action)
 kb:IngestJob-a1b2c3d4-e5f6-7890-abcd-ef1111111111
 	a action_ai_ext:IngestJob ;
-	uco-core:description "Full ingest of data source image."@en ;
+	uco-core:description "Full ingest of data source image."^^xsd:string ;
 	uco-action:endTime "2026-02-24T12:00:00-05:00"^^xsd:dateTime ;
 	uco-core:hasFacet kb:ActionSummaryFacet-ingest-22222222-2222-2222-2222-222222222222 .
 
@@ -35,7 +39,7 @@ kb:ActionSummaryFacet-ingest-22222222-2222-2222-2222-222222222222
 # ModuleExecution (single module run) with ActionSummaryFacet
 kb:ModuleExecution-m3d4e5f6-a7b8-9012-cdef-333333333333
 	a action_ai_ext:ModuleExecution ;
-	uco-core:description "Hash lookup module run."@en ;
+	uco-core:description "Hash lookup module run."^^xsd:string ;
 	uco-action:endTime "2026-02-24T11:50:00-05:00"^^xsd:dateTime ;
 	uco-core:hasFacet kb:ActionSummaryFacet-module-44444444-4444-4444-4444-444444444444 .
 
@@ -49,7 +53,7 @@ kb:ActionSummaryFacet-module-44444444-4444-4444-4444-444444444444
 # HashComputation action (existing pattern, now with ActionSummaryFacet)
 kb:HashComputation-b2bb09ff-7ba9-40c2-9188-04f6b97bd10f
 	a action_ai_ext:HashComputation , uco-action:Action ;
-	uco-core:description "This example action takes as input a file that might or might not have been hashed before, and results in a ContentData object with a hash value."@en ;
+	uco-core:description "This example action takes as input a file that might or might not have been hashed before, and results in a ContentData object with a hash value."^^xsd:string ;
 	uco-action:endTime "2026-02-24T11:45:56-05:00"^^xsd:dateTime ;
 	uco-action:object kb:File-4c3e7516-909b-453a-8841-b7f43cab2e55 ;
 	uco-action:result kb:ContentData-c37b9286-cb4b-4c90-9591-1a952c3c4198 ;
@@ -139,13 +143,14 @@ kb:EventRecord-cccccccc-cccc-cccc-cccc-cccccccccccc
 	a observable:EventRecord ;
 	uco-core:hasFacet kb:WindowsEventRecordFacet-dddddddd-dddd-dddd-dddd-dddddddddddd .
 
+# Base UCO EventRecordFacet allows maxCount 1 for observable:account; subjectAccount and targetAccount are subproperties,
+# so only one is used here to satisfy case_validate. Real data can use both when validated with extension shapes only.
 kb:WindowsEventRecordFacet-dddddddd-dddd-dddd-dddd-dddddddddddd
 	a observable_ai_ext:WindowsEventRecordFacet ;
 	observable_ai_ext:eventChannel "Security" ;
 	observable_ai_ext:eventProvider "Microsoft-Windows-Security-Auditing" ;
 	observable_ai_ext:eventComputer "WORKSTATION01" ;
 	observable_ai_ext:subjectAccount kb:DigitalAccount-subject-eeeeeeee ;
-	observable_ai_ext:targetAccount kb:DigitalAccount-target-ffffffff ;
 	observable_ai_ext:logonId "0x1A2B3C" .
 
 kb:DigitalAccount-subject-eeeeeeee
