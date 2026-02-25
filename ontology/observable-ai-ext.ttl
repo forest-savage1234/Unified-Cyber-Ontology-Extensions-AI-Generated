@@ -1,0 +1,793 @@
+# imports: https://ontology.unifiedcyberontology.org/uco/core/1.4.0
+# imports: https://ontology.unifiedcyberontology.org/uco/action/1.4.0
+# imports: https://ontology.unifiedcyberontology.org/uco/observable/1.4.0
+# imports: https://ontology.unifiedcyberontology.org/uco/tool/1.4.0
+
+@prefix observable_ai_ext: <https://ontology.unifiedcyberontology.org/uco/observable-ai-ext/> .
+@prefix observable: <https://ontology.unifiedcyberontology.org/uco/observable/> .
+@prefix uco-action: <https://ontology.unifiedcyberontology.org/uco/action/> .
+@prefix uco-core: <https://ontology.unifiedcyberontology.org/uco/core/> .
+@prefix uco-tool: <https://ontology.unifiedcyberontology.org/uco/tool/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ontology.unifiedcyberontology.org/uco/observable-ai-ext>
+	a owl:Ontology ;
+	rdfs:label "UCO Observable AI Extensions (AI-Generated)"@en ;
+	rdfs:comment "AI-generated UCO Observable extensions created for Project VIC's Autopsy-Rust project. These extensions add: (1) forensic extraction provenance facets for tracing any extracted observable back to its source file, record locator, and extraction tool/action; (2) enriched Windows event record attribution supporting multiple accounts (Subject vs Target) and logon/session correlation; and (3) memory image representation for volatile memory acquisitions. These extensions do NOT assert account-to-human ownership."@en ;
+	owl:imports
+		uco-core:1.4.0 ,
+		uco-action:1.4.0 ,
+		observable:1.4.0 ,
+		uco-tool:1.4.0
+		;
+	owl:versionIRI observable_ai_ext:1.0.0 ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 1) Forensic Extraction Provenance
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:ForensicExtractionFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Forensic Extraction Facet"@en ;
+	rdfs:comment "A facet describing how and where an observable was extracted from a forensic data source. Captures the source file (e.g., NTUSER.DAT, SAM hive, EVTX log, pagefile, memory image container), a record locator (e.g., registry key path, EVTX record number, XPath, database table/row), byte offset within the source file, and the extraction tool and action that performed the extraction. This facet can be attached to any ObservableObject via uco-core:hasFacet. Generated for Project VIC's Autopsy-Rust project."@en ;
+	.
+
+observable_ai_ext:sourceFile
+	a owl:ObjectProperty ;
+	rdfs:label "sourceFile"@en ;
+	rdfs:comment "The file from which the observable was extracted (e.g., an NTUSER.DAT registry hive, a SAM hive, an EVTX log file, a pagefile, a hibernation file, or a memory image container)."@en ;
+	rdfs:range observable:File ;
+	.
+
+observable_ai_ext:sourceRecordLocator
+	a owl:DatatypeProperty ;
+	rdfs:label "sourceRecordLocator"@en ;
+	rdfs:comment "A locator string identifying the specific record within the source file from which the observable was extracted (e.g., a Windows registry key path like 'HKU\\S-1-5-21-...-1001\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist', an EVTX record number, an XPath expression, a database table/row reference, or an MFT entry number)."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:sourceByteOffset
+	a owl:DatatypeProperty ;
+	rdfs:label "sourceByteOffset"@en ;
+	rdfs:comment "The byte offset within the source file at which the extracted record begins, when available."@en ;
+	rdfs:range xsd:nonNegativeInteger ;
+	.
+
+observable_ai_ext:extractionTool
+	a owl:ObjectProperty ;
+	rdfs:label "extractionTool"@en ;
+	rdfs:comment "The tool or module that performed the extraction of this observable from its source file."@en ;
+	rdfs:range uco-tool:ConfiguredTool ;
+	.
+
+observable_ai_ext:extractionAction
+	a owl:ObjectProperty ;
+	rdfs:label "extractionAction"@en ;
+	rdfs:comment "The action instance that performed the extraction (may be a CASE InvestigativeAction or a UCO Action-compatible node documenting the extraction step)."@en ;
+	rdfs:range uco-action:Action ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 2) Windows Event Record Enrichment
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:WindowsEventRecordFacet
+	a owl:Class ;
+	rdfs:subClassOf observable:EventRecordFacet ;
+	rdfs:label "Windows Event Record Facet"@en ;
+	rdfs:comment "An extension of the UCO EventRecordFacet that adds Windows-specific event metadata and multi-account attribution. Windows Security events commonly reference two distinct accounts (SubjectUserSid/SubjectUserName and TargetUserSid/TargetUserName), which the base EventRecordFacet's single 'account' property cannot express. This facet adds subjectAccount and targetAccount as subproperties of observable:account, plus event channel, provider, computer, and logon ID for session correlation. Generated for Project VIC's Autopsy-Rust project."@en ;
+	.
+
+observable_ai_ext:eventChannel
+	a owl:DatatypeProperty ;
+	rdfs:label "eventChannel"@en ;
+	rdfs:comment "The Windows Event Log channel in which the event was recorded (e.g., 'Security', 'System', 'Application', 'Microsoft-Windows-Sysmon/Operational')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:eventProvider
+	a owl:DatatypeProperty ;
+	rdfs:label "eventProvider"@en ;
+	rdfs:comment "The provider (source) name that generated the event record (e.g., 'Microsoft-Windows-Security-Auditing', 'Microsoft-Windows-Sysmon')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:eventComputer
+	a owl:DatatypeProperty ;
+	rdfs:label "eventComputer"@en ;
+	rdfs:comment "The computer name recorded in the event, identifying the machine on which the event was generated."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:subjectAccount
+	a owl:ObjectProperty ;
+	rdfs:subPropertyOf observable:account ;
+	rdfs:label "subjectAccount"@en ;
+	rdfs:comment "The subject (acting) account referenced by a Windows event record. Corresponds to SubjectUserSid/SubjectUserName fields in Windows Security events. This is the account that performed the action logged by the event."@en ;
+	rdfs:range observable:ObservableObject ;
+	.
+
+observable_ai_ext:targetAccount
+	a owl:ObjectProperty ;
+	rdfs:subPropertyOf observable:account ;
+	rdfs:label "targetAccount"@en ;
+	rdfs:comment "The target account referenced by a Windows event record. Corresponds to TargetUserSid/TargetUserName fields in Windows Security events. This is the account that was acted upon (e.g., the account being logged into during a logon event)."@en ;
+	rdfs:range observable:ObservableObject ;
+	.
+
+observable_ai_ext:logonId
+	a owl:DatatypeProperty ;
+	rdfs:label "logonId"@en ;
+	rdfs:comment "The Windows logon/session identifier from event records, process tokens, or memory analysis. Logon IDs are useful for correlating subject activity across multiple events, processes, and memory artifacts within the same logon session (e.g., '0x3E7' for SYSTEM, '0x1A2B3C' for an interactive logon)."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 3) Memory Image Representation
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:MemoryImage
+	a owl:Class ;
+	rdfs:subClassOf observable:ObservableObject ;
+	rdfs:label "Memory Image"@en ;
+	rdfs:comment "A representation of acquired volatile memory (RAM) from a computer system. This may be a full physical memory dump, a hibernation file (hiberfil.sys), a pagefile (pagefile.sys), a crash dump, or other memory acquisition format. Memory images serve as data sources from which processes, network connections, loaded modules, user sessions, and other volatile artifacts can be extracted. Generated for Project VIC's Autopsy-Rust project."@en ;
+	.
+
+observable_ai_ext:MemoryImageFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Memory Image Facet"@en ;
+	rdfs:comment "A facet capturing characteristics of a memory image acquisition, including the format of the image, the time of acquisition, the CPU architecture of the source system, and any additional notes about the acquisition process."@en ;
+	.
+
+observable_ai_ext:acquiredTime
+	a owl:DatatypeProperty ;
+	rdfs:label "acquiredTime"@en ;
+	rdfs:comment "The date and time at which the memory image was acquired from the source system, if known."@en ;
+	rdfs:range xsd:dateTime ;
+	.
+
+observable_ai_ext:memoryFormat
+	a owl:DatatypeProperty ;
+	rdfs:label "memoryFormat"@en ;
+	rdfs:comment "The format of the memory image (e.g., 'raw', 'AFF4', 'Lime', 'hiberfil', 'pagefile', 'crashdump', 'ELF core')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:architecture
+	a owl:DatatypeProperty ;
+	rdfs:label "architecture"@en ;
+	rdfs:comment "The CPU architecture of the source system (e.g., 'x86', 'amd64', 'arm64')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 4) Digital Account Extension Properties
+#
+# Properties used by Autopsy-Rust on uco-observable:AccountFacet to capture
+# Windows-specific and multi-platform account join keys beyond the base
+# UCO accountIdentifier.  These enable deduplication and correlation of
+# account objects across multiple artifacts.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:rid
+	a owl:DatatypeProperty ;
+	rdfs:label "rid"@en ;
+	rdfs:comment "The Windows Relative Identifier (RID) portion of a Security Identifier (SID). RIDs such as 500 (Administrator) or 501 (Guest) identify well-known accounts; user-created accounts typically start at 1000. Used as a secondary join key when a full SID is unavailable."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:accountDomain
+	a owl:DatatypeProperty ;
+	rdfs:label "accountDomain"@en ;
+	rdfs:comment "The domain or machine name associated with an account (e.g., 'WORKGROUP', 'CONTOSO', or a local hostname). Combined with the username, this forms a unique key for account deduplication across artifacts."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:profilePath
+	a owl:DatatypeProperty ;
+	rdfs:label "profilePath"@en ;
+	rdfs:comment "The file system path to the user's profile directory (e.g., 'C:\\Users\\jdoe', '/home/jdoe'). Used as a fallback join key when SID or username+domain pairs are unavailable."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 5) Encryption Detection Facet
+#
+# Captures findings from the Encryption Detection ingest module when a file
+# or volume is identified as encrypted or suspected of containing encryption.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:EncryptionDetectionFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Encryption Detection Facet"@en ;
+	rdfs:comment "A facet describing a file or volume detected as encrypted or suspected of containing encrypted content. Captures the detection method (entropy analysis, known container signature, header magic), the identified or suspected encryption algorithm, and the confidence level of the determination. Generated for Project VIC's Autopsy-Rust Encryption Detection module."@en ;
+	.
+
+observable_ai_ext:detectionMethod
+	a owl:DatatypeProperty ;
+	rdfs:label "detectionMethod"@en ;
+	rdfs:comment "The method used to detect encryption (e.g., 'entropy_analysis', 'header_signature', 'known_container_extension', 'volume_header')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:encryptionType
+	a owl:DatatypeProperty ;
+	rdfs:label "encryptionType"@en ;
+	rdfs:comment "The identified or suspected encryption algorithm or container type (e.g., 'BitLocker', 'FileVault', 'VeraCrypt', 'AES-256-CBC', 'PGP', 'unknown')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:detectionStatus
+	a owl:DatatypeProperty ;
+	rdfs:label "detectionStatus"@en ;
+	rdfs:comment "Whether encryption was confirmed ('detected') or merely suspected based on heuristics ('suspected')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:entropyValue
+	a owl:DatatypeProperty ;
+	rdfs:label "entropyValue"@en ;
+	rdfs:comment "The computed Shannon entropy of the file or segment, expressed as a decimal between 0.0 and 8.0 (bits per byte). High entropy (typically > 7.5) is a strong indicator of encryption or compression."@en ;
+	rdfs:range xsd:decimal ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 6) YARA Match Facet
+#
+# Captures findings from the YARA ingest module when a file matches one
+# or more YARA rules.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:YaraMatchFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "YARA Match Facet"@en ;
+	rdfs:comment "A facet describing a YARA rule match against a file. Captures the rule name, the rule set or file from which it originated, and the match offset within the file. Multiple matches against the same file may produce multiple facets or multiple instances. Generated for Project VIC's Autopsy-Rust YARA module."@en ;
+	.
+
+observable_ai_ext:yaraRuleName
+	a owl:DatatypeProperty ;
+	rdfs:label "yaraRuleName"@en ;
+	rdfs:comment "The name of the YARA rule that matched (e.g., 'ransomware_wannacry', 'mimikatz_strings')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:yaraRuleFile
+	a owl:DatatypeProperty ;
+	rdfs:label "yaraRuleFile"@en ;
+	rdfs:comment "The path or filename of the YARA rule file that contains the matched rule."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:yaraRuleNamespace
+	a owl:DatatypeProperty ;
+	rdfs:label "yaraRuleNamespace"@en ;
+	rdfs:comment "The YARA namespace of the matched rule, if the rule file defines namespaces."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 7) Interesting Item Facet
+#
+# Captures findings from the Interesting Items ingest module when a file
+# or artifact matches a user-defined or built-in rule set.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:InterestingItemFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Interesting Item Facet"@en ;
+	rdfs:comment "A facet indicating that a file or artifact was flagged as 'interesting' by a configurable rule set. Captures the rule set name, the specific rule that matched, and the match reason. Supports both built-in rules (e.g., encryption indicators, executables in temp folders) and user-defined rules. Generated for Project VIC's Autopsy-Rust Interesting Items module."@en ;
+	.
+
+observable_ai_ext:ruleSetName
+	a owl:DatatypeProperty ;
+	rdfs:label "ruleSetName"@en ;
+	rdfs:comment "The name of the rule set that flagged this item (e.g., 'Encryption Suspects', 'Executables in Temp')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:ruleName
+	a owl:DatatypeProperty ;
+	rdfs:label "ruleName"@en ;
+	rdfs:comment "The name of the specific rule within the rule set that matched."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:matchReason
+	a owl:DatatypeProperty ;
+	rdfs:label "matchReason"@en ;
+	rdfs:comment "A human-readable explanation of why the item was flagged (e.g., 'File extension .exe found in Users/*/AppData/Local/Temp')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 8) Program Execution Facet
+#
+# Captures evidence of program execution from Prefetch, UserAssist,
+# ShimCache, BAM/DAM, and similar Windows artifacts.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:ProgramExecutionFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Program Execution Facet"@en ;
+	rdfs:comment "A facet documenting evidence that a program was executed on the system. Sources include Windows Prefetch files, UserAssist registry keys, ShimCache, BAM/DAM, Amcache, and similar execution artifacts. Captures execution count, last execution time(s), and the artifact source. Generated for Project VIC's Autopsy-Rust Recent Activity module."@en ;
+	.
+
+observable_ai_ext:programName
+	a owl:DatatypeProperty ;
+	rdfs:label "programName"@en ;
+	rdfs:comment "The name or path of the executed program as recorded by the execution artifact source."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:executionCount
+	a owl:DatatypeProperty ;
+	rdfs:label "executionCount"@en ;
+	rdfs:comment "The number of times the program was executed, as recorded by the artifact source (e.g., Prefetch run count, UserAssist count)."@en ;
+	rdfs:range xsd:integer ;
+	.
+
+observable_ai_ext:lastExecutionTime
+	a owl:DatatypeProperty ;
+	rdfs:label "lastExecutionTime"@en ;
+	rdfs:comment "The most recent execution timestamp as recorded by the artifact source."@en ;
+	rdfs:range xsd:dateTime ;
+	.
+
+observable_ai_ext:executionSource
+	a owl:DatatypeProperty ;
+	rdfs:label "executionSource"@en ;
+	rdfs:comment "The artifact source from which execution evidence was derived (e.g., 'Prefetch', 'UserAssist', 'ShimCache', 'BAM', 'Amcache')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 9) Verification Result Facet
+#
+# Captures data integrity verification results from the Data Source
+# Integrity module.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:VerificationResultFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Verification Result Facet"@en ;
+	rdfs:comment "A facet documenting the result of a data integrity verification (e.g., comparing computed hashes of a forensic image against known-good values). Captures the verification type, expected and actual values, and pass/fail status. Generated for Project VIC's Autopsy-Rust Data Source Integrity module."@en ;
+	.
+
+observable_ai_ext:verificationType
+	a owl:DatatypeProperty ;
+	rdfs:label "verificationType"@en ;
+	rdfs:comment "The type of verification performed (e.g., 'MD5', 'SHA-256', 'SHA-1', 'sector_hash')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:expectedValue
+	a owl:DatatypeProperty ;
+	rdfs:label "expectedValue"@en ;
+	rdfs:comment "The expected hash or checksum value that was compared against."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:actualValue
+	a owl:DatatypeProperty ;
+	rdfs:label "actualValue"@en ;
+	rdfs:comment "The computed hash or checksum value obtained from the data source."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:verificationStatus
+	a owl:DatatypeProperty ;
+	rdfs:label "verificationStatus"@en ;
+	rdfs:comment "Whether the verification passed or failed (e.g., 'passed', 'failed', 'skipped')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 10) EXIF Data Facet
+#
+# Captures EXIF metadata extracted from image files (JPEG, TIFF, etc.)
+# by the Picture Analyzer module.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:EXIFDataFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "EXIF Data Facet"@en ;
+	rdfs:comment "A facet capturing EXIF metadata extracted from image files. Includes camera make/model, original capture date/time, GPS coordinates, and image dimensions. Generated for Project VIC's Autopsy-Rust Picture Analyzer module."@en ;
+	.
+
+observable_ai_ext:exifCameraMake
+	a owl:DatatypeProperty ;
+	rdfs:label "exifCameraMake"@en ;
+	rdfs:comment "The camera manufacturer from EXIF Make tag."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:exifCameraModel
+	a owl:DatatypeProperty ;
+	rdfs:label "exifCameraModel"@en ;
+	rdfs:comment "The camera model from EXIF Model tag."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:exifDateTimeOriginal
+	a owl:DatatypeProperty ;
+	rdfs:label "exifDateTimeOriginal"@en ;
+	rdfs:comment "The original date and time when the photo was taken, from EXIF DateTimeOriginal tag."@en ;
+	rdfs:range xsd:dateTime ;
+	.
+
+observable_ai_ext:exifGpsLatitude
+	a owl:DatatypeProperty ;
+	rdfs:label "exifGpsLatitude"@en ;
+	rdfs:comment "GPS latitude coordinate from EXIF GPS data."@en ;
+	rdfs:range xsd:decimal ;
+	.
+
+observable_ai_ext:exifGpsLongitude
+	a owl:DatatypeProperty ;
+	rdfs:label "exifGpsLongitude"@en ;
+	rdfs:comment "GPS longitude coordinate from EXIF GPS data."@en ;
+	rdfs:range xsd:decimal ;
+	.
+
+observable_ai_ext:exifImageWidth
+	a owl:DatatypeProperty ;
+	rdfs:label "exifImageWidth"@en ;
+	rdfs:comment "Image width in pixels from EXIF PixelXDimension or ImageWidth tag."@en ;
+	rdfs:range xsd:integer ;
+	.
+
+observable_ai_ext:exifImageHeight
+	a owl:DatatypeProperty ;
+	rdfs:label "exifImageHeight"@en ;
+	rdfs:comment "Image height in pixels from EXIF PixelYDimension or ImageLength tag."@en ;
+	rdfs:range xsd:integer ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 11) Hash Set Hit Facet
+#
+# Captures information about a file matching a known hash value in a
+# hash set database (e.g., NSRL, Project VIC, custom hash sets).
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:HashSetHitFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Hash Set Hit Facet"@en ;
+	rdfs:comment "A facet indicating that a file's hash matched a value in a known hash set database. Captures the hash set name, the matched hash algorithm and value, and the categorization (e.g., known good, known bad, notable). Generated for Project VIC's Autopsy-Rust Hash Lookup module."@en ;
+	.
+
+observable_ai_ext:hashSetName
+	a owl:DatatypeProperty ;
+	rdfs:label "hashSetName"@en ;
+	rdfs:comment "The name of the hash set database that contained the matching hash (e.g., 'NSRL', 'Project VIC', 'Custom Evidence Set')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:matchedHashValue
+	a owl:DatatypeProperty ;
+	rdfs:label "matchedHashValue"@en ;
+	rdfs:comment "The hash value that was matched in the hash set."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:hashCategory
+	a owl:DatatypeProperty ;
+	rdfs:label "hashCategory"@en ;
+	rdfs:comment "The categorization of the matched hash (e.g., 'known', 'known_bad', 'notable')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 12) Web Download Facet
+#
+# Extends web history artifacts with download-specific metadata.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:WebDownloadFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Web Download Facet"@en ;
+	rdfs:comment "A facet capturing download-specific metadata for files obtained via a web browser. Includes the source URL, the local download path, and the download timestamp. Generated for Project VIC's Autopsy-Rust Recent Activity module."@en ;
+	.
+
+observable_ai_ext:downloadSourceUrl
+	a owl:DatatypeProperty ;
+	rdfs:label "downloadSourceUrl"@en ;
+	rdfs:comment "The URL from which the file was downloaded."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:downloadTargetPath
+	a owl:DatatypeProperty ;
+	rdfs:label "downloadTargetPath"@en ;
+	rdfs:comment "The local file path where the download was saved."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:downloadDateTime
+	a owl:DatatypeProperty ;
+	rdfs:label "downloadDateTime"@en ;
+	rdfs:comment "The date and time the download was initiated or completed."@en ;
+	rdfs:range xsd:dateTime ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 13) Timeline Event Facet
+#
+# Captures timeline events from the Plaso / log2timeline ingest module.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:TimelineEventFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Timeline Event Facet"@en ;
+	rdfs:comment "A facet describing a timeline event extracted by Plaso (log2timeline). Captures parser/source type, event timestamp, human-readable description, and additional context such as host, username, timestamp meaning, source filename/display name, pathspec, and tags."@en ;
+	.
+
+observable_ai_ext:eventType
+	a owl:DatatypeProperty ;
+	rdfs:label "eventType"@en ;
+	rdfs:comment "The parser or source type of the timeline event (e.g., Plaso parser name, sourcetype)."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:eventTimestamp
+	a owl:DatatypeProperty ;
+	rdfs:label "eventTimestamp"@en ;
+	rdfs:comment "The date and time when the timeline event occurred."@en ;
+	rdfs:range xsd:dateTime ;
+	.
+
+observable_ai_ext:eventDescription
+	a owl:DatatypeProperty ;
+	rdfs:label "eventDescription"@en ;
+	rdfs:comment "A short description or message for the timeline event."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:eventHostname
+	a owl:DatatypeProperty ;
+	rdfs:label "eventHostname"@en ;
+	rdfs:comment "Host or computer name associated with the timeline event, when provided by the source parser."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:eventUsername
+	a owl:DatatypeProperty ;
+	rdfs:label "eventUsername"@en ;
+	rdfs:comment "User account name associated with the timeline event, when available."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:timestampDescription
+	a owl:DatatypeProperty ;
+	rdfs:label "timestampDescription"@en ;
+	rdfs:comment "Description of what the timestamp represents (e.g., creation time, access time, modification time)."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:sourceFilename
+	a owl:DatatypeProperty ;
+	rdfs:label "sourceFilename"@en ;
+	rdfs:comment "Source filename reported by Plaso for the event."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:sourceDisplayName
+	a owl:DatatypeProperty ;
+	rdfs:label "sourceDisplayName"@en ;
+	rdfs:comment "Source display name reported by Plaso for the event."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:sourcePathspec
+	a owl:DatatypeProperty ;
+	rdfs:label "sourcePathspec"@en ;
+	rdfs:comment "Source pathspec string reported by Plaso for the event."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:eventTag
+	a owl:DatatypeProperty ;
+	rdfs:label "eventTag"@en ;
+	rdfs:comment "Tag(s) associated with the timeline event (e.g., parser/classification tags)."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 14) Object Detection Facet
+#
+# Captures object detection results from the Object Detection ingest module
+# (ONNX/YOLO-style inference on images).
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:ObjectDetectionFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Object Detection Facet"@en ;
+	rdfs:comment "A facet describing an object detection result from image analysis. Captures the detected label, confidence score, bounding box, and optional model name. Generated for Project VIC's Autopsy-Rust Object Detection module."@en ;
+	.
+
+observable_ai_ext:detectionLabel
+	a owl:DatatypeProperty ;
+	rdfs:label "detectionLabel"@en ;
+	rdfs:comment "The class or label of the detected object (e.g., COCO class name)."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:confidence
+	a owl:DatatypeProperty ;
+	rdfs:label "confidence"@en ;
+	rdfs:comment "The confidence score of the detection (typically 0.0 to 1.0)."@en ;
+	rdfs:range xsd:decimal ;
+	.
+
+observable_ai_ext:boundingBox
+	a owl:DatatypeProperty ;
+	rdfs:label "boundingBox"@en ;
+	rdfs:comment "The bounding box of the detection, e.g. 'x,y,w,h' in normalized or pixel coordinates."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:modelName
+	a owl:DatatypeProperty ;
+	rdfs:label "modelName"@en ;
+	rdfs:comment "The name or path of the object detection model used (optional)."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 15) Malware Hit Facet
+#
+# Captures malware hash set matches from the Malware Scan ingest module.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:MalwareHitFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Malware Hit Facet"@en ;
+	rdfs:comment "A facet indicating that a file's hash matched a known malware hash set. Captures the hash set name, matched hash value (MD5), description, and optional category (e.g. 'known_bad'). Semantically distinct from HashsetHitFacet for malware-specific filtering. Generated for Project VIC's Autopsy-Rust Malware Scan module."@en ;
+	.
+
+observable_ai_ext:malwareHitDescription
+	a owl:DatatypeProperty ;
+	rdfs:label "malwareHitDescription"@en ;
+	rdfs:comment "Human-readable description of the malware hit (e.g., 'File hash matches known malware set: setname')."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:threatCategory
+	a owl:DatatypeProperty ;
+	rdfs:label "threatCategory"@en ;
+	rdfs:comment "Category of the malware hit (e.g., 'known_bad'). May be set by exporter for malware-scan outputs."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 16) Cross-Case Correlation Facet
+#
+# Captures central repository correlation results emitted as AnalysisResult
+# artifacts by the cross-case correlation ingest module.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:CrossCaseCorrelationFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Cross-Case Correlation Facet"@en ;
+	rdfs:comment "A facet describing cross-case correlation results from a central repository lookup. Captures correlation type, a short summary, and related case references or names."@en ;
+	.
+
+observable_ai_ext:correlationType
+	a owl:DatatypeProperty ;
+	rdfs:label "correlationType"@en ;
+	rdfs:comment "The type of correlation performed (e.g., file hash, domain, account, or other repository-supported attribute)."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:correlationSummary
+	a owl:DatatypeProperty ;
+	rdfs:label "correlationSummary"@en ;
+	rdfs:comment "A concise summary of the correlation outcome returned by the central repository lookup."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:correlatedCaseList
+	a owl:DatatypeProperty ;
+	rdfs:label "correlatedCaseList"@en ;
+	rdfs:comment "A string or serialized list naming case identifiers associated with the correlation hit."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 17) Face Detection Facet
+#
+# Captures face detection output produced by picture analysis workflows.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:FaceDetectedFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Face Detected Facet"@en ;
+	rdfs:comment "A facet describing face detection results extracted from an image, including count and optional confidence or bounding box data."@en ;
+	.
+
+observable_ai_ext:faceCount
+	a owl:DatatypeProperty ;
+	rdfs:label "faceCount"@en ;
+	rdfs:comment "The number of faces detected in the source image."@en ;
+	rdfs:range xsd:integer ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 18) Keyword Hit Facet
+#
+# Captures keyword-search results including matched term and nearby context.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:KeywordHitFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Keyword Hit Facet"@en ;
+	rdfs:comment "A facet describing a keyword-search hit, including the matched keyword, preview/context text, and keyword set name when applicable."@en ;
+	.
+
+observable_ai_ext:keywordTerm
+	a owl:DatatypeProperty ;
+	rdfs:label "keywordTerm"@en ;
+	rdfs:comment "The exact keyword, phrase, or expression that produced the hit."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:keywordContext
+	a owl:DatatypeProperty ;
+	rdfs:label "keywordContext"@en ;
+	rdfs:comment "A short snippet of surrounding content that provides context for the keyword hit."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:keywordSetName
+	a owl:DatatypeProperty ;
+	rdfs:label "keywordSetName"@en ;
+	rdfs:comment "The keyword list or set from which the matching term originated."@en ;
+	rdfs:range xsd:string ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 19) Bluetooth Facet Compatibility
+#
+# Compatibility facet for exporters that currently emit BluetoothFacet.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+observable_ai_ext:BluetoothFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Bluetooth Facet"@en ;
+	rdfs:comment "Compatibility facet for Bluetooth artifacts when exporter output uses a generic BluetoothFacet label. Captures device name and address where available."@en ;
+	.
+
+observable_ai_ext:bluetoothAddress
+	a owl:DatatypeProperty ;
+	rdfs:label "bluetoothAddress"@en ;
+	rdfs:comment "A Bluetooth device address (e.g., BD_ADDR) associated with the artifact."@en ;
+	rdfs:range xsd:string ;
+	.
+
+observable_ai_ext:bluetoothName
+	a owl:DatatypeProperty ;
+	rdfs:label "bluetoothName"@en ;
+	rdfs:comment "A Bluetooth device name or alias associated with the artifact."@en ;
+	rdfs:range xsd:string ;
+	.

@@ -1,0 +1,214 @@
+# Exemplar (A-Box) for action-ai-ext and observable-ai-ext. Instantiates extension classes with UUID-based IRIs.
+# CDO Playground: use with ontology/action-ai-ext.ttl, action-ai-ext-shapes.ttl, observable-ai-ext.ttl, observable-ai-ext-shapes.ttl.
+# For SHACL validation, pass ontology graphs (extension + UCO action/observable) so class hierarchy is recognized.
+# Reference: CDO-Playground-Instructions.md (Valid Turtle Serialization Instantiating the Class).
+
+@prefix action_ai_ext: <https://ontology.unifiedcyberontology.org/uco/action-ai-ext/> .
+@prefix kb: <http://example.org/kb/> .
+@prefix observable_ai_ext: <https://ontology.unifiedcyberontology.org/uco/observable-ai-ext/> .
+@prefix observable: <https://ontology.unifiedcyberontology.org/uco/observable/> .
+@prefix uco-action: <https://ontology.unifiedcyberontology.org/uco/action/> .
+@prefix uco-core: <https://ontology.unifiedcyberontology.org/uco/core/> .
+@prefix uco-observable: <https://ontology.unifiedcyberontology.org/uco/observable/> .
+@prefix uco-tool: <https://ontology.unifiedcyberontology.org/uco/tool/> .
+@prefix uco-types: <https://ontology.unifiedcyberontology.org/uco/types/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# action-ai-ext: Action types and ActionSummaryFacet
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# IngestJob (top-level orchestration action)
+kb:IngestJob-a1b2c3d4-e5f6-7890-abcd-ef1111111111
+	a action_ai_ext:IngestJob ;
+	uco-core:description "Full ingest of data source image."@en ;
+	uco-action:endTime "2026-02-24T12:00:00-05:00"^^xsd:dateTime ;
+	uco-core:hasFacet kb:ActionSummaryFacet-ingest-22222222-2222-2222-2222-222222222222 .
+
+kb:ActionSummaryFacet-ingest-22222222-2222-2222-2222-222222222222
+	a action_ai_ext:ActionSummaryFacet ;
+	action_ai_ext:filesProcessed 15000 ;
+	action_ai_ext:artifactsCreated 4200 ;
+	action_ai_ext:errorsEncountered 3 ;
+	action_ai_ext:processingDurationSeconds 847.5 .
+
+# ModuleExecution (single module run) with ActionSummaryFacet
+kb:ModuleExecution-m3d4e5f6-a7b8-9012-cdef-333333333333
+	a action_ai_ext:ModuleExecution ;
+	uco-core:description "Hash lookup module run."@en ;
+	uco-action:endTime "2026-02-24T11:50:00-05:00"^^xsd:dateTime ;
+	uco-core:hasFacet kb:ActionSummaryFacet-module-44444444-4444-4444-4444-444444444444 .
+
+kb:ActionSummaryFacet-module-44444444-4444-4444-4444-444444444444
+	a action_ai_ext:ActionSummaryFacet ;
+	action_ai_ext:filesProcessed 15000 ;
+	action_ai_ext:artifactsCreated 0 ;
+	action_ai_ext:errorsEncountered 0 ;
+	action_ai_ext:processingDurationSeconds 12.3 .
+
+# HashComputation action (existing pattern, now with ActionSummaryFacet)
+kb:HashComputation-b2bb09ff-7ba9-40c2-9188-04f6b97bd10f
+	a action_ai_ext:HashComputation , uco-action:Action ;
+	uco-core:description "This example action takes as input a file that might or might not have been hashed before, and results in a ContentData object with a hash value."@en ;
+	uco-action:endTime "2026-02-24T11:45:56-05:00"^^xsd:dateTime ;
+	uco-action:object kb:File-4c3e7516-909b-453a-8841-b7f43cab2e55 ;
+	uco-action:result kb:ContentData-c37b9286-cb4b-4c90-9591-1a952c3c4198 ;
+	uco-core:hasFacet kb:ActionSummaryFacet-hash-55555555-5555-5555-5555-555555555555 .
+
+kb:ActionSummaryFacet-hash-55555555-5555-5555-5555-555555555555
+	a action_ai_ext:ActionSummaryFacet ;
+	action_ai_ext:filesProcessed 1 ;
+	action_ai_ext:artifactsCreated 1 ;
+	action_ai_ext:errorsEncountered 0 ;
+	action_ai_ext:processingDurationSeconds 0.02 .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# UCO core: File, ContentData, Hash (supporting nodes)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+kb:File-4c3e7516-909b-453a-8841-b7f43cab2e55
+	a uco-observable:File ;
+	uco-core:hasFacet kb:YaraMatchFacet-66666666-6666-6666-6666-666666666666 ;
+	uco-core:hasFacet kb:ForensicExtractionFacet-77777777-7777-7777-7777-777777777777 .
+
+kb:ContentData-c37b9286-cb4b-4c90-9591-1a952c3c4198
+	a uco-observable:ContentData ;
+	uco-core:hasFacet kb:ContentDataFacet-1d8fdbb8-cab6-4194-b353-d2af1768c649 ;
+	uco-core:hasFacet kb:ForensicExtractionFacet-88888888-8888-8888-8888-888888888888 .
+
+kb:ContentDataFacet-1d8fdbb8-cab6-4194-b353-d2af1768c649
+	a uco-observable:ContentDataFacet ;
+	uco-observable:hash kb:Hash-812c70e1-4bb2-4c30-b753-713e123684ea .
+
+kb:Hash-812c70e1-4bb2-4c30-b753-713e123684ea
+	a uco-types:Hash ;
+	uco-types:hashMethod "SHA3_256" ;
+	uco-types:hashValue "4c582d5f5081de42d97adb5da1faed4cc12790cce41bb9900af0e250f047fc0d"^^xsd:hexBinary .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# observable-ai-ext: ForensicExtractionFacet (provenance for extracted observables)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+kb:ForensicExtractionFacet-77777777-7777-7777-7777-777777777777
+	a observable_ai_ext:ForensicExtractionFacet ;
+	observable_ai_ext:sourceFile kb:File-4c3e7516-909b-453a-8841-b7f43cab2e55 ;
+	observable_ai_ext:sourceRecordLocator "MFT entry 12345" ;
+	observable_ai_ext:sourceByteOffset "0"^^xsd:nonNegativeInteger ;
+	observable_ai_ext:extractionTool kb:ConfiguredTool-autopsy-hash-99999999 ;
+	observable_ai_ext:extractionAction kb:HashComputation-b2bb09ff-7ba9-40c2-9188-04f6b97bd10f .
+
+kb:ForensicExtractionFacet-88888888-8888-8888-8888-888888888888
+	a observable_ai_ext:ForensicExtractionFacet ;
+	observable_ai_ext:sourceRecordLocator "hash result for file" ;
+	observable_ai_ext:extractionTool kb:ConfiguredTool-autopsy-hash-99999999 ;
+	observable_ai_ext:extractionAction kb:HashComputation-b2bb09ff-7ba9-40c2-9188-04f6b97bd10f .
+
+kb:ConfiguredTool-autopsy-hash-99999999
+	a uco-tool:ConfiguredTool ;
+	uco-core:name "Autopsy Hash Lookup" .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# observable-ai-ext: YaraMatchFacet (on a file)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+kb:YaraMatchFacet-66666666-6666-6666-6666-666666666666
+	a observable_ai_ext:YaraMatchFacet ;
+	observable_ai_ext:yaraRuleName "suspicious_script" ;
+	observable_ai_ext:yaraRuleFile "custom_rules.yar" ;
+	observable_ai_ext:yaraRuleNamespace "default" .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# observable-ai-ext: MemoryImage and MemoryImageFacet
+# ═══════════════════════════════════════════════════════════════════════════════
+
+kb:MemoryImage-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+	a observable_ai_ext:MemoryImage ;
+	uco-core:hasFacet kb:MemoryImageFacet-bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb .
+
+kb:MemoryImageFacet-bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb
+	a observable_ai_ext:MemoryImageFacet ;
+	observable_ai_ext:acquiredTime "2026-02-24T10:30:00Z"^^xsd:dateTime ;
+	observable_ai_ext:memoryFormat "raw" ;
+	observable_ai_ext:architecture "amd64" .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# observable-ai-ext: WindowsEventRecordFacet (EventRecord with subject/target accounts)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+kb:EventRecord-cccccccc-cccc-cccc-cccc-cccccccccccc
+	a observable:EventRecord ;
+	uco-core:hasFacet kb:WindowsEventRecordFacet-dddddddd-dddd-dddd-dddd-dddddddddddd .
+
+kb:WindowsEventRecordFacet-dddddddd-dddd-dddd-dddd-dddddddddddd
+	a observable_ai_ext:WindowsEventRecordFacet ;
+	observable_ai_ext:eventChannel "Security" ;
+	observable_ai_ext:eventProvider "Microsoft-Windows-Security-Auditing" ;
+	observable_ai_ext:eventComputer "WORKSTATION01" ;
+	observable_ai_ext:subjectAccount kb:DigitalAccount-subject-eeeeeeee ;
+	observable_ai_ext:targetAccount kb:DigitalAccount-target-ffffffff ;
+	observable_ai_ext:logonId "0x1A2B3C" .
+
+kb:DigitalAccount-subject-eeeeeeee
+	a uco-observable:DigitalAccount ;
+	uco-core:hasFacet kb:AccountFacet-subject-eeeeeeee .
+
+kb:AccountFacet-subject-eeeeeeee
+	a observable:AccountFacet ;
+	observable:accountIdentifier "S-1-5-21-1234567890-987654321-1001" ;
+	observable_ai_ext:rid "1001" ;
+	observable_ai_ext:accountDomain "CONTOSO" ;
+	observable_ai_ext:profilePath "C:\\Users\\jdoe" .
+
+kb:DigitalAccount-target-ffffffff
+	a uco-observable:DigitalAccount ;
+	uco-core:hasFacet kb:AccountFacet-target-ffffffff .
+
+kb:AccountFacet-target-ffffffff
+	a observable:AccountFacet ;
+	observable:accountIdentifier "S-1-5-18" ;
+	observable_ai_ext:rid "500" ;
+	observable_ai_ext:accountDomain "WORKSTATION01" .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# observable-ai-ext: EncryptionDetectionFacet (on an encrypted file)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+kb:File-encrypted-11111111-1111-1111-1111-111111111111
+	a uco-observable:File ;
+	uco-core:hasFacet kb:EncryptionDetectionFacet-12121212-1212-1212-1212-121212121212 .
+
+kb:EncryptionDetectionFacet-12121212-1212-1212-1212-121212121212
+	a observable_ai_ext:EncryptionDetectionFacet ;
+	observable_ai_ext:detectionMethod "entropy_analysis" ;
+	observable_ai_ext:encryptionType "AES-256-CBC" ;
+	observable_ai_ext:detectionStatus "suspected" ;
+	observable_ai_ext:entropyValue 7.92 .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# observable-ai-ext: ProgramExecutionFacet (Prefetch/UserAssist-style evidence)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+kb:ObservableWithExecFacet-13131313-1313-1313-1313-131313131313
+	a uco-observable:ObservableObject ;
+	uco-core:hasFacet kb:ProgramExecutionFacet-14141414-1414-1414-1414-141414141414 .
+
+kb:ProgramExecutionFacet-14141414-1414-1414-1414-141414141414
+	a observable_ai_ext:ProgramExecutionFacet ;
+	observable_ai_ext:programName "C:\\Windows\\System32\\notepad.exe" ;
+	observable_ai_ext:executionCount 5 ;
+	observable_ai_ext:lastExecutionTime "2026-02-24T09:15:00Z"^^xsd:dateTime ;
+	observable_ai_ext:executionSource "Prefetch" .
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# observable-ai-ext: InterestingItemFacet (rule-based flag)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+kb:File-interesting-15151515-1515-1515-1515-151515151515
+	a uco-observable:File ;
+	uco-core:hasFacet kb:InterestingItemFacet-16161616-1616-1616-1616-161616161616 .
+
+kb:InterestingItemFacet-16161616-1616-1616-1616-161616161616
+	a observable_ai_ext:InterestingItemFacet ;
+	observable_ai_ext:ruleSetName "Executables in Temp" ;
+	observable_ai_ext:ruleName "exe_in_temp" ;
+	observable_ai_ext:matchReason "File extension .exe found in Users/*/AppData/Local/Temp" .

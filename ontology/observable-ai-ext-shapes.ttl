@@ -1,0 +1,215 @@
+# SHACL shapes for observable-ai-ext. OWL definitions in observable-ai-ext.ttl.
+# CDO Playground: separate shapes file for testing (see CDO-Playground-Instructions.md).
+
+@prefix observable_ai_ext: <https://ontology.unifiedcyberontology.org/uco/observable-ai-ext/> .
+@prefix observable: <https://ontology.unifiedcyberontology.org/uco/observable/> .
+@prefix uco-action: <https://ontology.unifiedcyberontology.org/uco/action/> .
+@prefix uco-tool: <https://ontology.unifiedcyberontology.org/uco/tool/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# 1) Forensic Extraction Provenance
+observable_ai_ext:ForensicExtractionFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:ForensicExtractionFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:sourceFile ; sh:class observable:File ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ,
+		[ sh:path observable_ai_ext:sourceRecordLocator ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:sourceByteOffset ; sh:datatype xsd:nonNegativeInteger ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:extractionTool ; sh:class uco-tool:ConfiguredTool ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ,
+		[ sh:path observable_ai_ext:extractionAction ; sh:class uco-action:Action ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+	.
+
+# 2) Windows Event Record Enrichment
+observable_ai_ext:WindowsEventRecordFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:WindowsEventRecordFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:eventChannel ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:eventProvider ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:eventComputer ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:subjectAccount ; sh:class observable:ObservableObject ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ,
+		[ sh:path observable_ai_ext:targetAccount ; sh:class observable:ObservableObject ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ,
+		[ sh:path observable_ai_ext:logonId ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 3) Memory Image (no property constraints)
+observable_ai_ext:MemoryImageShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:MemoryImage ;
+	.
+
+# 3) Memory Image Facet
+observable_ai_ext:MemoryImageFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:MemoryImageFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:acquiredTime ; sh:datatype xsd:dateTime ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:memoryFormat ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:architecture ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 5) Encryption Detection Facet
+observable_ai_ext:EncryptionDetectionFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:EncryptionDetectionFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:detectionMethod ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:encryptionType ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:detectionStatus ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:entropyValue ; sh:datatype xsd:decimal ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 6) YARA Match Facet
+observable_ai_ext:YaraMatchFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:YaraMatchFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:yaraRuleName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:yaraRuleFile ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:yaraRuleNamespace ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 7) Interesting Item Facet
+observable_ai_ext:InterestingItemFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:InterestingItemFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:ruleSetName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:ruleName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:matchReason ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 8) Program Execution Facet
+observable_ai_ext:ProgramExecutionFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:ProgramExecutionFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:programName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:executionCount ; sh:datatype xsd:integer ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:lastExecutionTime ; sh:datatype xsd:dateTime ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:executionSource ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 9) Verification Result Facet
+observable_ai_ext:VerificationResultFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:VerificationResultFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:verificationType ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:expectedValue ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:actualValue ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:verificationStatus ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 10) EXIF Data Facet
+observable_ai_ext:EXIFDataFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:EXIFDataFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:exifCameraMake ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:exifCameraModel ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:exifDateTimeOriginal ; sh:datatype xsd:dateTime ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:exifGpsLatitude ; sh:datatype xsd:decimal ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:exifGpsLongitude ; sh:datatype xsd:decimal ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:exifImageWidth ; sh:datatype xsd:integer ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:exifImageHeight ; sh:datatype xsd:integer ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 11) Hash Set Hit Facet
+observable_ai_ext:HashSetHitFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:HashSetHitFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:hashSetName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:matchedHashValue ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:hashCategory ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 12) Web Download Facet
+observable_ai_ext:WebDownloadFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:WebDownloadFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:downloadSourceUrl ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:downloadTargetPath ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:downloadDateTime ; sh:datatype xsd:dateTime ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 13) Timeline Event Facet
+observable_ai_ext:TimelineEventFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:TimelineEventFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:eventType ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:eventTimestamp ; sh:datatype xsd:dateTime ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:eventDescription ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:eventHostname ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:eventUsername ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:timestampDescription ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:sourceFilename ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:sourceDisplayName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:sourcePathspec ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:eventTag ; sh:datatype xsd:string ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 14) Object Detection Facet
+observable_ai_ext:ObjectDetectionFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:ObjectDetectionFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:detectionLabel ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:confidence ; sh:datatype xsd:decimal ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:boundingBox ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:modelName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 15) Malware Hit Facet
+observable_ai_ext:MalwareHitFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:MalwareHitFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:hashSetName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:matchedHashValue ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:malwareHitDescription ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:threatCategory ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 16) Cross-Case Correlation Facet
+observable_ai_ext:CrossCaseCorrelationFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:CrossCaseCorrelationFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:correlationType ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:correlationSummary ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:correlatedCaseList ; sh:datatype xsd:string ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 17) Face Detected Facet
+observable_ai_ext:FaceDetectedFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:FaceDetectedFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:faceCount ; sh:datatype xsd:integer ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:confidence ; sh:datatype xsd:decimal ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:boundingBox ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 18) Keyword Hit Facet
+observable_ai_ext:KeywordHitFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:KeywordHitFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:keywordTerm ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:keywordContext ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:keywordSetName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.
+
+# 19) Bluetooth Facet
+observable_ai_ext:BluetoothFacetShape
+	a sh:NodeShape ;
+	sh:targetClass observable_ai_ext:BluetoothFacet ;
+	sh:property
+		[ sh:path observable_ai_ext:bluetoothAddress ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ,
+		[ sh:path observable_ai_ext:bluetoothName ; sh:datatype xsd:string ; sh:maxCount 1 ; sh:nodeKind sh:Literal ] ;
+	.

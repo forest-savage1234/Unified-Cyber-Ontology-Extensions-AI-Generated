@@ -1,0 +1,272 @@
+# imports: https://ontology.unifiedcyberontology.org/uco/core/1.4.0
+# imports: https://ontology.unifiedcyberontology.org/uco/action/1.4.0
+# imports: https://ontology.unifiedcyberontology.org/uco/observable/1.4.0
+
+@prefix action_ai_ext: <https://ontology.unifiedcyberontology.org/uco/action-ai-ext/> .
+@prefix uco-action: <https://ontology.unifiedcyberontology.org/uco/action/> .
+@prefix uco-core: <https://ontology.unifiedcyberontology.org/uco/core/> .
+@prefix uco-observable: <https://ontology.unifiedcyberontology.org/uco/observable/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ontology.unifiedcyberontology.org/uco/action-ai-ext>
+	a owl:Ontology ;
+	rdfs:label "UCO Action AI Extensions (AI-Generated)"@en ;
+	rdfs:comment "AI-generated UCO Action extensions for Project VIC's Autopsy-Rust project. These extensions define structured action type vocabularies and an action summary facet for documenting the outcomes of forensic analysis actions (ingest module executions, carving, keyword search, etc.). Each Autopsy-Rust ingest module execution is recorded as a CASE InvestigativeAction with an attached ActionSummaryFacet capturing processing statistics. Generated during Autopsy-Rust feature parity implementation."@en ;
+	owl:imports
+		uco-core:1.4.0 ,
+		uco-action:1.4.0 ,
+		uco-observable:1.4.0
+		;
+	owl:versionIRI action_ai_ext:1.0.0 ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 1) Action Summary Facet
+#
+# Attached to InvestigativeAction nodes to capture quantitative outcomes
+# of a forensic analysis action (e.g., module execution statistics).
+# ═══════════════════════════════════════════════════════════════════════════════
+
+action_ai_ext:ActionSummaryFacet
+	a owl:Class ;
+	rdfs:subClassOf uco-core:Facet ;
+	rdfs:label "Action Summary Facet"@en ;
+	rdfs:comment "A facet capturing quantitative outcomes of a forensic analysis action, such as the number of files processed, artifacts created, errors encountered, and the processing duration. Attached to CASE InvestigativeAction nodes via uco-core:hasFacet. Generated for Project VIC's Autopsy-Rust project."@en ;
+	.
+
+action_ai_ext:filesProcessed
+	a owl:DatatypeProperty ;
+	rdfs:label "filesProcessed"@en ;
+	rdfs:comment "The total number of files processed by the action (e.g., files analyzed by an ingest module)."@en ;
+	rdfs:range xsd:integer ;
+	.
+
+action_ai_ext:artifactsCreated
+	a owl:DatatypeProperty ;
+	rdfs:label "artifactsCreated"@en ;
+	rdfs:comment "The total number of blackboard artifacts created as a result of the action."@en ;
+	rdfs:range xsd:integer ;
+	.
+
+action_ai_ext:errorsEncountered
+	a owl:DatatypeProperty ;
+	rdfs:label "errorsEncountered"@en ;
+	rdfs:comment "The number of errors encountered during the action that did not cause the action to abort."@en ;
+	rdfs:range xsd:integer ;
+	.
+
+action_ai_ext:processingDurationSeconds
+	a owl:DatatypeProperty ;
+	rdfs:label "processingDurationSeconds"@en ;
+	rdfs:comment "The wall-clock duration of the action in seconds."@en ;
+	rdfs:range xsd:decimal ;
+	.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 2) Forensic Action Type Vocabulary (owl:Class)
+#
+# Action type classes used in Autopsy-Rust provenance logging. Each class
+# is instantiable: an InvestigativeAction or Action node is typed with
+# one of these classes (e.g. kb:SomeAction-<uuid> a action_ai_ext:HashComputation).
+# CDO Playground: concepts must be owl:Class with rdfs:subClassOf, not
+# owl:NamedIndividual. Parent: uco-observable:ObservableAction.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+action_ai_ext:IngestJob
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Ingest Job"@en ;
+	rdfs:comment "A top-level data source ingest job that orchestrates the execution of multiple analysis modules against a data source. Instantiate as the type of an action node (e.g. kb:Action-<uuid> a action_ai_ext:IngestJob)."@en ;
+	.
+
+action_ai_ext:ModuleExecution
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Module Execution"@en ;
+	rdfs:comment "The execution of a single ingest module (file-level or data-source-level) as part of an ingest job."@en ;
+	.
+
+action_ai_ext:HashComputation
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Hash Computation"@en ;
+	rdfs:comment "Computation of cryptographic hash values (MD5, SHA-1, SHA-256) for a file."@en ;
+	.
+
+action_ai_ext:MimeTypeIdentification
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "MIME Type Identification"@en ;
+	rdfs:comment "Identification of a file's MIME type through magic-byte analysis, forensic signatures, or extension-based heuristics."@en ;
+	.
+
+action_ai_ext:KnownFileStatusUpdate
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Known File Status Update"@en ;
+	rdfs:comment "Updating a file's known status (known-good, known-bad/notable, unknown) via hash set lookup."@en ;
+	.
+
+action_ai_ext:KeywordSearch
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Keyword Search"@en ;
+	rdfs:comment "Full-text keyword, phrase, or regular expression search across indexed content."@en ;
+	.
+
+action_ai_ext:FileCarving
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "File Carving"@en ;
+	rdfs:comment "Recovery of files from unallocated space or raw data streams by scanning for file signatures."@en ;
+	.
+
+action_ai_ext:UserTagging
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "User Tagging"@en ;
+	rdfs:comment "Examiner-initiated tagging of a file or artifact with a named tag."@en ;
+	.
+
+action_ai_ext:ReportGeneration
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Report Generation"@en ;
+	rdfs:comment "Generation of an output report (CASE/UCO, HTML, CSV, KML, body file, etc.)."@en ;
+	.
+
+action_ai_ext:DataSourceAddition
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Data Source Addition"@en ;
+	rdfs:comment "Addition of a new data source (disk image, logical file set, etc.) to a case."@en ;
+	.
+
+action_ai_ext:EncryptionDetection
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Encryption Detection"@en ;
+	rdfs:comment "Analysis of files or volumes for indicators of encryption via entropy analysis, known container signatures, or header detection."@en ;
+	.
+
+action_ai_ext:YaraScanning
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "YARA Scanning"@en ;
+	rdfs:comment "Scanning files against YARA rules for pattern-based malware or indicator detection."@en ;
+	.
+
+action_ai_ext:DataSourceIntegrityVerification
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Data Source Integrity Verification"@en ;
+	rdfs:comment "Verification of data source integrity by comparing computed hashes against expected values."@en ;
+	.
+
+action_ai_ext:EmbeddedFileExtraction
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Embedded File Extraction"@en ;
+	rdfs:comment "Extraction of files embedded within archive containers (ZIP, RAR, 7z) or compound documents (OLE2)."@en ;
+	.
+
+action_ai_ext:VirtualMachineDetection
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Virtual Machine Detection"@en ;
+	rdfs:comment "Detection and registration of virtual machine disk images (VMDK, VHD, VHDX) as nested data sources."@en ;
+	.
+
+action_ai_ext:DroneDataParsing
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Drone Data Parsing"@en ;
+	rdfs:comment "Parsing of drone flight logs and telemetry data (DJI, Parrot, etc.) to extract GPS trackpoints and flight path information."@en ;
+	.
+
+action_ai_ext:AndroidArtifactExtraction
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Android Artifact Extraction"@en ;
+	rdfs:comment "Extraction and parsing of Android application databases (contacts, call logs, SMS, browser history, etc.)."@en ;
+	.
+
+action_ai_ext:CrossCaseCorrelation
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Cross-Case Correlation"@en ;
+	rdfs:comment "Checking of file hashes and other correlation attributes against the central repository for cross-case matches and notable item identification."@en ;
+	.
+
+action_ai_ext:PlasoTimelineExtraction
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Plaso Timeline Extraction"@en ;
+	rdfs:comment "Timeline event extraction via Plaso (log2timeline.py / psort.py) from a data source."@en ;
+	.
+
+action_ai_ext:MalwareScanning
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Malware Scanning"@en ;
+	rdfs:comment "Hash-based scanning of files against a malware hash set; posts AnalysisResult on match."@en ;
+	.
+
+action_ai_ext:ScalpelCarving
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Scalpel Carving"@en ;
+	rdfs:comment "File recovery from unallocated space using the Scalpel carver (external binary)."@en ;
+	.
+
+action_ai_ext:PhotoRecCarving
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "PhotoRec Carving"@en ;
+	rdfs:comment "File recovery from unallocated space using PhotoRec (external binary)."@en ;
+	.
+
+action_ai_ext:ObjectDetection
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Object Detection"@en ;
+	rdfs:comment "Image object detection via ONNX (YOLO/SSD-style) model; posts AnalysisResult with label, confidence, bounding box."@en ;
+	.
+
+action_ai_ext:FileExtensionMismatchCheck
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "File Extension Mismatch Check"@en ;
+	rdfs:comment "Detection of files whose extension does not match the identified MIME type."@en ;
+	.
+
+action_ai_ext:iOSArtifactExtraction
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "iOS Artifact Extraction"@en ;
+	rdfs:comment "Extraction and parsing of iOS artifacts via iLEAPP (contacts, messages, call logs, etc.)."@en ;
+	.
+
+action_ai_ext:GPXParsing
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "GPX Parsing"@en ;
+	rdfs:comment "Parsing of GPX files to extract GPS trackpoints, routes, and waypoints."@en ;
+	.
+
+action_ai_ext:TextExtraction
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Text Extraction"@en ;
+	rdfs:comment "Extraction of text content from files (plain text, PDF, Office, HTML, etc.); posts ExtractedText artifacts."@en ;
+	.
+
+action_ai_ext:PictureAnalysis
+	a owl:Class ;
+	rdfs:subClassOf uco-observable:ObservableAction ;
+	rdfs:label "Picture Analysis"@en ;
+	rdfs:comment "EXIF/GPS metadata extraction and image categorization (picture analyzer module)."@en ;
+	.

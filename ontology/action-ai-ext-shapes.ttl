@@ -1,0 +1,36 @@
+# SHACL shapes for action-ai-ext. OWL definitions in action-ai-ext.ttl.
+# CDO Playground: separate shapes file for testing (see CDO-Playground-Instructions.md).
+
+@prefix action_ai_ext: <https://ontology.unifiedcyberontology.org/uco/action-ai-ext/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+action_ai_ext:ActionSummaryFacetShape
+	a sh:NodeShape ;
+	sh:targetClass action_ai_ext:ActionSummaryFacet ;
+	sh:property
+		[
+			sh:path action_ai_ext:filesProcessed ;
+			sh:datatype xsd:integer ;
+			sh:maxCount 1 ;
+			sh:nodeKind sh:Literal ;
+		] ,
+		[
+			sh:path action_ai_ext:artifactsCreated ;
+			sh:datatype xsd:integer ;
+			sh:maxCount 1 ;
+			sh:nodeKind sh:Literal ;
+		] ,
+		[
+			sh:path action_ai_ext:errorsEncountered ;
+			sh:datatype xsd:integer ;
+			sh:maxCount 1 ;
+			sh:nodeKind sh:Literal ;
+		] ,
+		[
+			sh:path action_ai_ext:processingDurationSeconds ;
+			sh:datatype xsd:decimal ;
+			sh:maxCount 1 ;
+			sh:nodeKind sh:Literal ;
+		] ;
+	.
