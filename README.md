@@ -294,6 +294,7 @@ Autopsy-Rust does **not** assert account-to-human ownership within its CASE/UCO 
 
 - **Base ontology:** UCO v1.4.0
 - **Import chain:** Each submodule imports the relevant UCO v1.4.0 modules
+- Live official UCO is 1.5.0. This repository still documents and imports 1.4.0. It has not been retargeted.
 - Extensions are additive and do not modify or conflict with base UCO terms
 
 ## Origin
