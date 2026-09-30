@@ -287,15 +287,15 @@ Autopsy-Rust does **not** assert account-to-human ownership within its CASE/UCO 
 
 - **Prefer existing UCO terms** -- only add what is genuinely missing for deep explainability
 - **Extend, don't replace** -- new facets/properties are additive; base UCO terms remain unchanged
-- **Subproperty hierarchy** -- `subjectAccount` and `targetAccount` are subproperties of existing `observable:account`, maintaining backward compatibility
+- **Subproperty hierarchy** -- `subjectAccount` and `targetAccount` are subproperties of existing `observable:account`
 - **Join-key-first attribution** -- all account/activity linking is done via machine identifiers (SID, RID, username+domain, logon ID, profile path), never human identity
 
 ## Compatibility
 
 - **Base ontology:** UCO v1.4.0
 - **Import chain:** Each submodule imports the relevant UCO v1.4.0 modules
-- Live official UCO is 1.5.0. This repository still documents and imports 1.4.0. It has not been retargeted.
-- Extensions are additive and do not modify or conflict with base UCO terms
+- Extensions are additive. The versioned imports above pin UCO 1.4.0;
+  compatibility with later UCO releases requires a separate review.
 
 ## Origin
 
